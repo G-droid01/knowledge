@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+
 import { 
   Sidebar, 
   SidebarContent, 
@@ -13,7 +13,7 @@ import {
   SidebarHeader,
   SidebarFooter
 } from '@/components/ui/sidebar';
-import { BookOpen, Home, BarChart, Users, Calendar, Settings, LogOut, Bell } from 'lucide-react';
+import { BookOpen, Home, BarChart, Users, Calendar, Settings, LogOut, Bell, Files } from 'lucide-react'; // 🆕 Added Files icon
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { signOut } from '@/lib/firebase';
@@ -91,6 +91,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <NavItem to="/" icon={Home} label="Dashboard" exact />
               <NavItem to="/courses" icon={BookOpen} label="Courses" />
+              <NavItem to="/study-material" icon={Files} label="Study Material" /> {/* 🆕 New Item */}
               <NavItem to="/calendar" icon={Calendar} label="Calendar" />
               <NavItem to="/analytics" icon={BarChart} label="Analytics" />
               <NavItem to="/students" icon={Users} label="Students" />
