@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Users, BarChart, BookOpen, CheckCircle2, Lock, Play } from 'lucide-react';
+import { Clock, Users, BarChart, BookOpen, CheckCircle2, Lock, Play, Check } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -14,76 +13,541 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 
-// Mock data for a single course
-const mockCourse = {
-  id: '1',
-  title: 'Complete React Developer in 2024',
-  description: 'Learn React from scratch and build real-world applications. This comprehensive course covers everything from the fundamentals to advanced concepts including React Router, Redux, Hooks, and more.',
-  instructor: {
-    name: 'Sarah Johnson',
-    avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-    title: 'Senior Frontend Developer',
-    bio: 'Sarah has over 8 years of experience in web development and has worked with companies like Google and Facebook. She specializes in React and modern JavaScript.',
+interface Lesson {
+  title: string;
+  duration: string;
+  completed: boolean;
+  youtubeUrl: string;
+}
+
+interface CurriculumSection {
+  title: string;
+  lessons: Lesson[];
+}
+
+interface Instructor {
+  name: string;
+  avatar: string;
+  title: string;
+  bio: string;
+}
+
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  instructor: Instructor;
+  thumbnail: string;
+  category: string;
+  duration: string;
+  students: number;
+  rating: number;
+  totalRatings: number;
+  progress: number;
+  lastUpdated: string;
+  language: string;
+  curriculum: CurriculumSection[];
+}
+
+// Mock data for courses
+const mockCourse: Course[] = [
+  {
+    id: '1',
+    title: 'Complete React Developer in 2024',
+    description: 'Learn React from scratch and build real-world applications. This comprehensive course covers everything from the fundamentals to advanced concepts including React Router, Redux, Hooks, and more.',
+    instructor: {
+      name: 'Sarah Johnson',
+      avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+      title: 'Senior Frontend Developer',
+      bio: 'Sarah has over 8 years of experience in web development and has worked with companies like Google and Facebook. She specializes in React and modern JavaScript.',
+    },
+    thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
+    category: 'Development',
+    duration: '24h 30m',
+    students: 2843,
+    rating: 4.8,
+    totalRatings: 342,
+    progress: 65,
+    lastUpdated: 'March 2024',
+    language: 'English',
+    curriculum: [
+      {
+        title: 'Getting Started with React',
+        lessons: [
+          { 
+            title: 'Introduction to the Course', 
+            duration: '10m', 
+            completed: true,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8'
+          },
+          { 
+            title: 'Setting Up Your Development Environment', 
+            duration: '15m', 
+            completed: true,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=10m'
+          },
+          { 
+            title: 'Your First React Component', 
+            duration: '25m', 
+            completed: true,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=25m'
+          },
+        ]
+      },
+      {
+        title: 'React Fundamentals',
+        lessons: [
+          { 
+            title: 'JSX Syntax in Depth', 
+            duration: '30m', 
+            completed: true,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=50m'
+          },
+          { 
+            title: 'Props and State', 
+            duration: '45m', 
+            completed: true,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=80m'
+          },
+          { 
+            title: 'Handling Events', 
+            duration: '20m', 
+            completed: true,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=125m'
+          },
+          { 
+            title: 'Conditional Rendering', 
+            duration: '25m', 
+            completed: true,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=145m'
+          },
+        ]
+      },
+      {
+        title: 'Working with React Hooks',
+        lessons: [
+          { 
+            title: 'Introduction to Hooks', 
+            duration: '20m', 
+            completed: true,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=170m'
+          },
+          { 
+            title: 'useState Hook', 
+            duration: '30m', 
+            completed: true,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=190m'
+          },
+          { 
+            title: 'useEffect Hook', 
+            duration: '40m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=220m'
+          },
+          { 
+            title: 'Custom Hooks', 
+            duration: '35m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=260m'
+          },
+        ]
+      },
+      {
+        title: 'Advanced React Concepts',
+        lessons: [
+          { 
+            title: 'Context API', 
+            duration: '35m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=295m'
+          },
+          { 
+            title: 'React Router', 
+            duration: '45m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=330m'
+          },
+          { 
+            title: 'Performance Optimization', 
+            duration: '30m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=375m'
+          },
+          { 
+            title: 'Error Boundaries', 
+            duration: '25m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=405m'
+          },
+        ]
+      },
+      {
+        title: 'State Management',
+        lessons: [
+          { 
+            title: 'Introduction to Redux', 
+            duration: '40m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=430m'
+          },
+          { 
+            title: 'Redux Toolkit', 
+            duration: '50m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=470m'
+          },
+          { 
+            title: 'Redux Middleware', 
+            duration: '35m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=520m'
+          },
+          { 
+            title: 'Alternative State Solutions', 
+            duration: '30m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=555m'
+          },
+        ]
+      },
+      {
+        title: 'Building a Real-World Application',
+        lessons: [
+          { 
+            title: 'Project Setup', 
+            duration: '15m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=585m'
+          },
+          { 
+            title: 'Implementing Features', 
+            duration: '60m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=600m'
+          },
+          { 
+            title: 'Styling with CSS-in-JS', 
+            duration: '25m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=660m'
+          },
+          { 
+            title: 'Testing React Components', 
+            duration: '45m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=685m'
+          },
+          { 
+            title: 'Deployment', 
+            duration: '20m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=730m'
+          },
+        ]
+      },
+      {
+        title: 'Advanced Topics',
+        lessons: [
+          { 
+            title: 'Server-Side Rendering', 
+            duration: '40m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=750m'
+          },
+          { 
+            title: 'Static Site Generation', 
+            duration: '35m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=790m'
+          },
+          { 
+            title: 'Authentication & Authorization', 
+            duration: '45m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=825m'
+          },
+          { 
+            title: 'API Integration', 
+            duration: '50m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=870m'
+          },
+        ]
+      }
+    ]
   },
-  thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
-  category: 'Development',
-  duration: '24h 30m',
-  students: 2843,
-  rating: 4.8,
-  totalRatings: 342,
-  progress: 65,
-  lastUpdated: 'March 2024',
-  language: 'English',
-  curriculum: [
-    {
-      title: 'Getting Started with React',
-      lessons: [
-        { title: 'Introduction to the Course', duration: '10m', completed: true },
-        { title: 'Setting Up Your Development Environment', duration: '15m', completed: true },
-        { title: 'Your First React Component', duration: '25m', completed: true },
-      ]
+  {
+    id: '2',
+    title: 'Complete UI/UX Designer in 2024',
+    description: 'Master UI/UX design from beginner to professional. This comprehensive course covers essential design principles, user research methods, wireframing, prototyping with industry-standard tools, and creating compelling design systems.',
+    instructor: {
+      name: 'Alex Rivera',
+      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+      title: 'Lead Product Designer',
+      bio: 'Alex has 10+ years of experience in UI/UX design and has worked with startups and Fortune 500 companies. Previously a design lead at Airbnb and Spotify, Alex specializes in user-centered design approaches.',
     },
-    {
-      title: 'React Fundamentals',
-      lessons: [
-        { title: 'JSX Syntax in Depth', duration: '30m', completed: true },
-        { title: 'Props and State', duration: '45m', completed: true },
-        { title: 'Handling Events', duration: '20m', completed: true },
-        { title: 'Conditional Rendering', duration: '25m', completed: true },
-      ]
+    thumbnail: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
+    category: 'Design',
+    duration: '22h 45m',
+    students: 3156,
+    rating: 4.9,
+    totalRatings: 387,
+    progress: 0,
+    lastUpdated: 'April 2024',
+    language: 'English',
+    curriculum: [
+      {
+        title: 'Introduction to UI/UX Design',
+        lessons: [
+          { 
+            title: 'Course Overview & Design Fundamentals', 
+            duration: '15m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=example17'
+          },
+          { 
+            title: 'Understanding the Design Process', 
+            duration: '25m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=example18'
+          },
+          { 
+            title: 'UI vs UX: Key Differences and Synergies', 
+            duration: '20m', 
+            completed: false,
+            youtubeUrl: 'https://www.youtube.com/watch?v=example19'
+          },
+        ]
+      },
+      // More sections...
+    ]
+  },
+  {
+    id: '3',
+    title: 'Digital Marketing Masterclass 2024',
+    description: 'Become a digital marketing expert with this comprehensive masterclass.',
+    instructor: {
+      name: 'Marcus Chen',
+      avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+      title: 'Digital Marketing Strategist',
+      bio: 'Marcus has over 12 years of experience in digital marketing.',
     },
-    {
-      title: 'Working with React Hooks',
-      lessons: [
-        { title: 'Introduction to Hooks', duration: '20m', completed: true },
-        { title: 'useState Hook', duration: '30m', completed: true },
-        { title: 'useEffect Hook', duration: '40m', completed: false },
-        { title: 'Custom Hooks', duration: '35m', completed: false },
-      ]
-    },
-    {
-      title: 'Building a Real-World Application',
-      lessons: [
-        { title: 'Project Setup', duration: '15m', completed: false },
-        { title: 'Implementing Features', duration: '60m', completed: false },
-        { title: 'Styling with CSS-in-JS', duration: '25m', completed: false },
-        { title: 'Testing React Components', duration: '45m', completed: false },
-        { title: 'Deployment', duration: '20m', completed: false },
-      ]
-    },
-  ]
-};
+    thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
+    category: 'Marketing',
+    duration: '28h 15m',
+    students: 4572,
+    rating: 4.7,
+    totalRatings: 529,
+    progress: 0,
+    lastUpdated: 'April 2024',
+    language: 'English',
+    curriculum: [
+      {
+        title: "Introduction to Digital Marketing",
+        lessons: [
+          { 
+            title: "Welcome to the Course", 
+            duration: "5m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=0m"
+          },
+          { 
+            title: "What is Digital Marketing?", 
+            duration: "12m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=5m"
+          },
+          { 
+            title: "The Digital Marketing Funnel", 
+            duration: "10m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=17m"
+          },
+        ],
+      },
+      {
+        title: "Content Marketing",
+        lessons: [
+          { 
+            title: "Understanding Content Strategy", 
+            duration: "18m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=27m"
+          },
+          { 
+            title: "Creating High-Quality Content", 
+            duration: "22m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=45m"
+          },
+          { 
+            title: "Content Distribution Channels", 
+            duration: "15m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=67m"
+          },
+        ],
+      },
+      {
+        title: "Search Engine Optimization (SEO)",
+        lessons: [
+          { 
+            title: "SEO Fundamentals", 
+            duration: "20m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=82m"
+          },
+          { 
+            title: "On-Page vs Off-Page SEO", 
+            duration: "25m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=102m"
+          },
+          { 
+            title: "Keyword Research Techniques", 
+            duration: "17m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=127m"
+          },
+          { 
+            title: "SEO Tools and Analytics", 
+            duration: "19m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=144m"
+          },
+        ],
+      },
+      {
+        title: "Social Media Marketing",
+        lessons: [
+          { 
+            title: "Major Social Platforms Overview", 
+            duration: "14m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=163m"
+          },
+          { 
+            title: "Building a Social Media Strategy", 
+            duration: "20m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=177m"
+          },
+          { 
+            title: "Paid Social Ads (Facebook, Instagram, LinkedIn)", 
+            duration: "27m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=197m"
+          },
+        ],
+      },
+      {
+        title: "Email Marketing",
+        lessons: [
+          { 
+            title: "Email Marketing Strategy", 
+            duration: "18m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=224m"
+          },
+          { 
+            title: "Building and Segmenting Email Lists", 
+            duration: "15m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=242m"
+          },
+          { 
+            title: "Writing Effective Email Copy", 
+            duration: "12m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=257m"
+          },
+        ],
+      },
+      {
+        title: "Pay-Per-Click (PPC) Advertising",
+        lessons: [
+          { 
+            title: "Introduction to PPC and Google Ads", 
+            duration: "16m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=269m"
+          },
+          { 
+            title: "Setting Up Your First Campaign", 
+            duration: "20m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=285m"
+          },
+          { 
+            title: "Optimizing Ad Performance", 
+            duration: "19m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=305m"
+          },
+        ],
+      },
+      {
+        title: "Analytics & Data-Driven Marketing",
+        lessons: [
+          { 
+            title: "Intro to Google Analytics", 
+            duration: "22m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=324m"
+          },
+          { 
+            title: "Tracking Conversions and KPIs", 
+            duration: "17m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=346m"
+          },
+          { 
+            title: "A/B Testing & Optimization", 
+            duration: "15m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=363m"
+          },
+        ],
+      },
+      {
+        title: "Final Project & Certification",
+        lessons: [
+          { 
+            title: "Capstone Project Brief", 
+            duration: "10m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=378m"
+          },
+          { 
+            title: "Submission Guidelines", 
+            duration: "5m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=388m"
+          },
+          { 
+            title: "Next Steps After Course Completion", 
+            duration: "8m",
+            completed: false,
+            youtubeUrl: "https://www.youtube.com/watch?v=w7ejDZ8SWv8&t=393m"
+          },
+        ],
+      },
+    ]
+  }
+];
 
 export function CourseDetail() {
   const { id } = useParams();
-  // In a real app, you would fetch the course data based on the ID
-  const course = mockCourse;
+  const selectedCourse = mockCourse.find(course => course.id === id) || mockCourse[0];
   
-  // Calculate completion statistics
-  const totalLessons = course.curriculum.reduce(
+  if (!selectedCourse) {
+    return <div>Course not found</div>;
+  }
+
+  const totalLessons = selectedCourse.curriculum.reduce(
     (total, section) => total + section.lessons.length, 0
   );
-  const completedLessons = course.curriculum.reduce(
+  const completedLessons = selectedCourse.curriculum.reduce(
     (total, section) => total + section.lessons.filter(lesson => lesson.completed).length, 0
   );
   
@@ -93,179 +557,99 @@ export function CourseDetail() {
         {/* Main Content */}
         <div className="flex-1">
           <div className="relative aspect-video rounded-lg overflow-hidden mb-6">
-            <img 
-              src={course.thumbnail} 
-              alt={course.title} 
+            <img
+              src={selectedCourse.thumbnail}
+              alt={selectedCourse.title}
               className="w-full h-full object-cover"
             />
           </div>
-          
-          <h1 className="text-3xl font-bold mb-4">{course.title}</h1>
-          
+
+          <h1 className="text-3xl font-bold mb-4">{selectedCourse.title}</h1>
+
           <div className="flex flex-wrap items-center gap-4 mb-6">
-            <Badge variant="secondary">{course.category}</Badge>
+            <Badge className="bg-secondary">{selectedCourse.category}</Badge>
             <div className="flex items-center text-sm text-muted-foreground">
               <Clock className="h-4 w-4 mr-1" />
-              <span>{course.duration}</span>
+              <span>{selectedCourse.duration}</span>
             </div>
             <div className="flex items-center text-sm text-muted-foreground">
               <Users className="h-4 w-4 mr-1" />
-              <span>{course.students} students</span>
+              <span>{selectedCourse.students} students</span>
             </div>
             <div className="flex items-center text-sm text-muted-foreground">
               <BarChart className="h-4 w-4 mr-1" />
-              <span>{course.rating} ({course.totalRatings} ratings)</span>
+              <span>{selectedCourse.rating} ({selectedCourse.totalRatings} ratings)</span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3 mb-8">
             <Avatar className="h-12 w-12">
-              <AvatarImage src={course.instructor.avatar} alt={course.instructor.name} />
-              <AvatarFallback>{course.instructor.name.charAt(0)}</AvatarFallback>
+              <AvatarImage src={selectedCourse.instructor.avatar} alt={selectedCourse.instructor.name} />
+              <AvatarFallback>{selectedCourse.instructor.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
-              <div className="font-medium">{course.instructor.name}</div>
-              <div className="text-sm text-muted-foreground">{course.instructor.title}</div>
+              <div className="font-medium">{selectedCourse.instructor.name}</div>
+              <div className="text-sm text-muted-foreground">{selectedCourse.instructor.title}</div>
             </div>
           </div>
           
-          <Tabs defaultValue="curriculum">
-            <TabsList className="w-full grid grid-cols-3 mb-6">
-              <TabsTrigger value="curriculum">Curriculum</TabsTrigger>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="instructor">Instructor</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="curriculum" className="animate-fade-in">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Course Content</h2>
-                <div className="text-sm text-muted-foreground">
-                  {completedLessons} / {totalLessons} lessons completed
-                </div>
-              </div>
-              
-              <Accordion type="single" collapsible className="w-full">
-                {course.curriculum.map((section, index) => (
-                  <AccordionItem key={index} value={`section-${index}`}>
-                    <AccordionTrigger className="hover:bg-muted/50 px-4 rounded-lg">
-                      <div className="flex justify-between w-full">
-                        <span>{section.title}</span>
-                        <span className="text-sm text-muted-foreground mr-4">
-                          {section.lessons.filter(l => l.completed).length} / {section.lessons.length} lessons
-                        </span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="px-4 py-2">
-                        {section.lessons.map((lesson, lessonIndex) => (
-                          <div 
-                            key={lessonIndex}
-                            className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 mb-1 cursor-pointer"
-                          >
-                            <div className="flex items-center">
-                              {lesson.completed ? (
-                                <CheckCircle2 className="h-4 w-4 text-primary mr-3" />
-                              ) : (
-                                <div className="w-4 h-4 rounded-full border border-muted-foreground/60 mr-3 flex items-center justify-center">
-                                  {lessonIndex === 0 && !section.lessons[lessonIndex - 1]?.completed && (
-                                    <Play className="h-2.5 w-2.5 text-muted-foreground/60" />
-                                  )}
-                                  {lessonIndex > 0 && section.lessons[lessonIndex - 1]?.completed && (
-                                    <Play className="h-2.5 w-2.5 text-muted-foreground/60" />
-                                  )}
-                                  {lessonIndex > 0 && !section.lessons[lessonIndex - 1]?.completed && (
-                                    <Lock className="h-2.5 w-2.5 text-muted-foreground/60" />
-                                  )}
-                                </div>
-                              )}
-                              <span className={lesson.completed ? "text-muted-foreground" : ""}>
-                                {lesson.title}
-                              </span>
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-4">About This Course</h2>
+            <p className="text-muted-foreground">{selectedCourse.description}</p>
+          </div>
+          
+          <div>
+            <h2 className="text-xl font-semibold mb-4">Course Curriculum</h2>
+            <Accordion type="single" collapsible className="w-full">
+              {selectedCourse.curriculum.map((section, index) => (
+                <AccordionItem key={index} value={`section-${index}`}>
+                  <AccordionTrigger className="hover:no-underline">
+                    <div className="flex justify-between items-center w-full pr-4">
+                      <span>{section.title}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {section.lessons.length} lessons
+                      </span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-2">
+                      {section.lessons.map((lesson, lessonIndex) => (
+                        <div 
+                          key={lessonIndex} 
+                          className="flex items-center justify-between p-3 rounded-md hover:bg-accent"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                                {lesson.completed ? (
+                                  <Check className="h-4 w-4 text-primary" />
+                                ) : (
+                                  <Play className="h-4 w-4 text-primary" />
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="font-medium">{lesson.title}</h4>
+                                <p className="text-sm text-muted-foreground">{lesson.duration}</p>
+                              </div>
                             </div>
-                            <div className="text-sm text-muted-foreground">{lesson.duration}</div>
+                            <div className="flex items-center gap-2">
+                              <Button className="h-8 w-8 p-0 hover:bg-accent hover:text-accent-foreground" asChild>
+                                <a href={lesson.youtubeUrl} target="_blank" rel="noopener noreferrer">
+                                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                  </svg>
+                                </a>
+                              </Button>
+                            </div>
                           </div>
-                        ))}
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </TabsContent>
-            
-            <TabsContent value="overview" className="animate-fade-in">
-              <Card>
-                <CardContent className="pt-6">
-                  <h3 className="text-xl font-bold mb-4">About This Course</h3>
-                  <p className="mb-6 text-muted-foreground">{course.description}</p>
-                  
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div>
-                      <h4 className="font-medium mb-2">Last Updated</h4>
-                      <p className="text-sm text-muted-foreground">{course.lastUpdated}</p>
+                        </div>
+                      ))}
                     </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Language</h4>
-                      <p className="text-sm text-muted-foreground">{course.language}</p>
-                    </div>
-                  </div>
-                  
-                  <h3 className="text-xl font-bold mb-4">What You'll Learn</h3>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-6">
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 mr-2 text-primary shrink-0" />
-                      <span>Build powerful, fast, user-friendly and reactive web apps</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 mr-2 text-primary shrink-0" />
-                      <span>Apply for high-paid jobs or work as a freelancer</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 mr-2 text-primary shrink-0" />
-                      <span>Understand the latest React patterns and best practices</span>
-                    </li>
-                    <li className="flex items-start">
-                      <CheckCircle2 className="h-5 w-5 mr-2 text-primary shrink-0" />
-                      <span>Become fluent in concepts like Hooks, State Management, and Redux</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="instructor" className="animate-fade-in">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-4 mb-6">
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage src={course.instructor.avatar} alt={course.instructor.name} />
-                      <AvatarFallback>{course.instructor.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="text-xl font-bold">{course.instructor.name}</h3>
-                      <p className="text-sm text-muted-foreground">{course.instructor.title}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-4 mb-6">
-                    <div className="text-center">
-                      <div className="font-bold text-xl">42</div>
-                      <div className="text-sm text-muted-foreground">Courses</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="font-bold text-xl">15,487</div>
-                      <div className="text-sm text-muted-foreground">Students</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="font-bold text-xl">4.8</div>
-                      <div className="text-sm text-muted-foreground">Rating</div>
-                    </div>
-                  </div>
-                  
-                  <p className="mb-6">{course.instructor.bio}</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
         </div>
         
         {/* Sidebar */}
@@ -276,12 +660,12 @@ export function CourseDetail() {
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-2">
                     <span className="font-medium">Your Progress</span>
-                    <span>{course.progress}% completed</span>
+                    <span>{selectedCourse.progress}% completed</span>
                   </div>
-                  <div className="progress-bar">
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
                     <div 
-                      className="progress-bar-fill" 
-                      style={{ width: `${course.progress}%` }}
+                      className="h-full bg-primary" 
+                      style={{ width: `${selectedCourse.progress}%` }}
                     ></div>
                   </div>
                 </div>
@@ -303,7 +687,7 @@ export function CourseDetail() {
                     <Clock className="h-5 w-5 text-muted-foreground mr-3" />
                     <div>
                       <div className="text-sm font-medium">Total Duration</div>
-                      <div className="text-sm text-muted-foreground">{course.duration}</div>
+                      <div className="text-sm text-muted-foreground">{selectedCourse.duration}</div>
                     </div>
                   </div>
                   <div className="flex items-center">

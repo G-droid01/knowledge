@@ -6,13 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Check, ChevronDown, ExternalLink, MessageSquare, User, UserPlus, BookOpen, Bell } from 'lucide-react';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 type Notification = {
   id: string;
@@ -122,20 +123,20 @@ const generateNotifications = (): Notification[] => {
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState<Notification[]>(generateNotifications());
   const { toast } = useToast();
-  
+
   const unreadCount = notifications.filter(n => !n.read).length;
-  
+
   const markAsRead = (id: string) => {
-    setNotifications(notifications.map(notif => 
+    setNotifications(notifications.map(notif =>
       notif.id === id ? { ...notif, read: true } : notif
     ));
-    
+
     toast({
       title: "Notification marked as read",
       description: "The notification has been marked as read",
     });
   };
-  
+
   const markAllAsRead = () => {
     setNotifications(notifications.map(notif => ({ ...notif, read: true })));
     toast({
@@ -143,7 +144,7 @@ const NotificationsPage = () => {
       description: "All notifications have been marked as read",
     });
   };
-  
+
   const deleteNotification = (id: string) => {
     setNotifications(notifications.filter(notif => notif.id !== id));
     toast({
@@ -151,7 +152,7 @@ const NotificationsPage = () => {
       description: "The notification has been removed from your inbox",
     });
   };
-  
+
   const getIcon = (type: Notification['type']) => {
     switch (type) {
       case 'message': return <MessageSquare className="h-5 w-5 text-blue-500" />;
@@ -161,20 +162,20 @@ const NotificationsPage = () => {
       default: return <Bell className="h-5 w-5" />;
     }
   };
-  
+
   const formatTime = (date: Date) => {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const oneDay = 86400000;
-    
+
     if (diff < 60000) return 'Just now';
     if (diff < 3600000) return `${Math.floor(diff / 60000)} minutes ago`;
     if (diff < oneDay) return `${Math.floor(diff / 3600000)} hours ago`;
     if (diff < oneDay * 2) return 'Yesterday';
-    
+
     return date.toLocaleDateString();
   };
-  
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -187,7 +188,7 @@ const NotificationsPage = () => {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button 
+            <Button
               variant="outline"
               onClick={markAllAsRead}
               disabled={unreadCount === 0}
@@ -211,7 +212,7 @@ const NotificationsPage = () => {
             </DropdownMenu>
           </div>
         </div>
-        
+
         <Tabs defaultValue="all">
           <TabsList>
             <TabsTrigger value="all">All</TabsTrigger>
@@ -219,7 +220,7 @@ const NotificationsPage = () => {
             <TabsTrigger value="messages">Messages</TabsTrigger>
             <TabsTrigger value="system">System</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="all">
             <Card>
               <CardHeader>
@@ -238,8 +239,8 @@ const NotificationsPage = () => {
                     </div>
                   ) : (
                     notifications.map((notification) => (
-                      <div 
-                        key={notification.id} 
+                      <div
+                        key={notification.id}
                         className={cn(
                           "flex gap-4 p-4 rounded-lg border transition-colors",
                           notification.read ? "bg-background" : "bg-accent/10 border-accent-foreground/20"
@@ -283,10 +284,10 @@ const NotificationsPage = () => {
                         </div>
                         <div className="flex-shrink-0 flex items-start space-x-2">
                           {!notification.read && (
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
                               onClick={() => markAsRead(notification.id)}
                             >
                               <Check className="h-4 w-4" />
@@ -328,7 +329,7 @@ const NotificationsPage = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="unread">
             <Card>
               <CardHeader>
@@ -347,8 +348,8 @@ const NotificationsPage = () => {
                     </div>
                   ) : (
                     notifications.filter(n => !n.read).map((notification) => (
-                      <div 
-                        key={notification.id} 
+                      <div
+                        key={notification.id}
                         className="flex gap-4 p-4 rounded-lg border transition-colors bg-accent/10 border-accent-foreground/20"
                       >
                         <div className="flex-shrink-0">
@@ -385,10 +386,10 @@ const NotificationsPage = () => {
                           )}
                         </div>
                         <div className="flex-shrink-0 flex items-start space-x-2">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
                             onClick={() => markAsRead(notification.id)}
                           >
                             <Check className="h-4 w-4" />
@@ -427,7 +428,7 @@ const NotificationsPage = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="messages">
             <Card>
               <CardHeader>
@@ -446,8 +447,8 @@ const NotificationsPage = () => {
                     </div>
                   ) : (
                     notifications.filter(n => n.type === 'message').map((notification) => (
-                      <div 
-                        key={notification.id} 
+                      <div
+                        key={notification.id}
                         className={cn(
                           "flex gap-4 p-4 rounded-lg border transition-colors",
                           notification.read ? "bg-background" : "bg-accent/10 border-accent-foreground/20"
@@ -478,10 +479,10 @@ const NotificationsPage = () => {
                           </p>
                         </div>
                         <div className="flex-shrink-0 flex items-start space-x-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="h-8" 
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8"
                           >
                             <MessageSquare className="mr-2 h-3 w-3" />
                             Reply
@@ -514,7 +515,7 @@ const NotificationsPage = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="system">
             <Card>
               <CardHeader>
@@ -533,8 +534,8 @@ const NotificationsPage = () => {
                     </div>
                   ) : (
                     notifications.filter(n => n.type === 'announcement' || n.type === 'reminder').map((notification) => (
-                      <div 
-                        key={notification.id} 
+                      <div
+                        key={notification.id}
                         className={cn(
                           "flex gap-4 p-4 rounded-lg border transition-colors",
                           notification.read ? "bg-background" : "bg-accent/10 border-accent-foreground/20"
@@ -569,10 +570,10 @@ const NotificationsPage = () => {
                         </div>
                         <div className="flex-shrink-0 flex items-start space-x-2">
                           {!notification.read && (
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
                               onClick={() => markAsRead(notification.id)}
                             >
                               <Check className="h-4 w-4" />

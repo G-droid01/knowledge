@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +10,8 @@ import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PlusCircle, Upload, Check } from 'lucide-react';
 
 const SettingsPage = () => {
   const { currentUser } = useAuth();
@@ -40,6 +41,20 @@ const SettingsPage = () => {
     highContrast: false,
   });
   
+  const [uploadForm, setUploadForm] = useState({
+    title: '',
+    program: '',
+    specialization: '',
+    file: null,
+  });
+  
+  const [isAddingProgram, setIsAddingProgram] = useState(false);
+  const [isAddingSpecialization, setIsAddingSpecialization] = useState(false);
+  const [newProgram, setNewProgram] = useState('');
+  const [newSpecialization, setNewSpecialization] = useState('');
+  const [localPrograms, setLocalPrograms] = useState([]);
+  const [localSpecializations, setLocalSpecializations] = useState({});
+
   const handleProfileUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
@@ -60,6 +75,29 @@ const SettingsPage = () => {
       title: "Appearance settings updated",
       description: "Your appearance preferences have been applied.",
     });
+  };
+  
+  const handleUpload = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast({
+      title: "Study material uploaded",
+      description: "Your study material has been uploaded successfully.",
+    });
+  };
+  
+  const handleAddProgram = () => {
+    // Implementation of adding a new program
+  };
+  
+  const handleAddSpecialization = () => {
+    // Implementation of adding a new specialization
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setUploadForm(prev => ({ ...prev, file }));
+    }
   };
   
   const userEmail = currentUser?.email || 'user@example.com';
@@ -87,6 +125,7 @@ const SettingsPage = () => {
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
             <TabsTrigger value="security">Security</TabsTrigger>
+            <TabsTrigger value="study-materials">Study Materials</TabsTrigger>
           </TabsList>
           
           <TabsContent value="profile">
@@ -105,7 +144,7 @@ const SettingsPage = () => {
                       <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <Button variant="outline" size="sm">
+                      <Button className="border bg-transparent hover:bg-gray-100 h-9 px-3 text-sm">
                         Change Avatar
                       </Button>
                       <p className="mt-2 text-xs text-muted-foreground">
@@ -383,7 +422,7 @@ const SettingsPage = () => {
                     </div>
                   </div>
                   
-                  <Button className="mt-2">
+                  <Button className="mt-2 border bg-transparent hover:bg-gray-100">
                     Update Password
                   </Button>
                 </div>
@@ -397,7 +436,7 @@ const SettingsPage = () => {
                     <p className="mt-1 text-sm text-muted-foreground">
                       Add an extra layer of security to your account by enabling two-factor authentication.
                     </p>
-                    <Button className="mt-4" variant="outline">
+                    <Button className="mt-4 border bg-transparent hover:bg-gray-100">
                       Enable 2FA
                     </Button>
                   </div>
@@ -414,10 +453,149 @@ const SettingsPage = () => {
                     </p>
                   </div>
                   
-                  <Button variant="outline" size="sm">
+                  <Button className="border bg-transparent hover:bg-gray-100 h-9 px-3 text-sm">
                     View Login History
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="study-materials">
+            <Card>
+              <CardHeader>
+                <CardTitle>Study Materials</CardTitle>
+                <CardDescription>
+                  Manage your study materials and upload new content.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <form onSubmit={handleUpload} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                      id="title"
+                      value={uploadForm.title}
+                      onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
+                      placeholder="Enter material title"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="program">Program</Label>
+                    {isAddingProgram ? (
+                      <div className="flex gap-2">
+                        <Input
+                          value={newProgram}
+                          onChange={(e) => setNewProgram(e.target.value)}
+                          placeholder="Enter new program name"
+                        />
+                        <Button 
+                          type="button" 
+                          onClick={handleAddProgram}
+                          className="shrink-0 border bg-transparent hover:bg-gray-100"
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Select
+                          value={uploadForm.program}
+                          onValueChange={(value) => setUploadForm(prev => ({ ...prev, program: value, specialization: "" }))}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select Program" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {localPrograms.map((program) => (
+                              <SelectItem key={program.id} value={program.id}>
+                                {program.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          type="button"
+                          onClick={() => setIsAddingProgram(true)}
+                          className="shrink-0 border bg-transparent hover:bg-gray-100"
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="specialization">Specialization</Label>
+                    {isAddingSpecialization ? (
+                      <div className="flex gap-2">
+                        <Input
+                          value={newSpecialization}
+                          onChange={(e) => setNewSpecialization(e.target.value)}
+                          placeholder="Enter new specialization name"
+                        />
+                        <Button 
+                          type="button" 
+                          onClick={handleAddSpecialization}
+                          className="shrink-0 border bg-transparent hover:bg-gray-100"
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Select
+                          value={uploadForm.specialization}
+                          onValueChange={(value) => setUploadForm(prev => ({ ...prev, specialization: value }))}
+                          disabled={!uploadForm.program}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select Specialization" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {uploadForm.program &&
+                              localSpecializations[uploadForm.program]?.map((spec) => (
+                                <SelectItem key={spec.id} value={spec.id}>
+                                  {spec.name}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          type="button"
+                          onClick={() => setIsAddingSpecialization(true)}
+                          disabled={!uploadForm.program}
+                          className="shrink-0 border bg-transparent hover:bg-gray-100"
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="file">File</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        id="file"
+                        type="file"
+                        onChange={handleFileChange}
+                        className="cursor-pointer"
+                      />
+                    </div>
+                    {uploadForm.file && (
+                      <p className="text-sm text-muted-foreground">
+                        Selected file: {uploadForm.file.name} ({(uploadForm.file.size / 1024 / 1024).toFixed(2)} MB)
+                      </p>
+                    )}
+                  </div>
+                  
+                  <Button type="submit" className="w-full">
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload Material
+                  </Button>
+                </form>
               </CardContent>
             </Card>
           </TabsContent>
