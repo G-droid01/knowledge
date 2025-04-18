@@ -3,6 +3,7 @@
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "types": ["d3-array", "d3-color", "d3-ease", "d3-interpolate", "d3-path", "d3-scale", "d3-shape", "d3-time", "d3-timer"],
     "module": "ESNext",
     "skipLibCheck": true,
 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,9 +19,7 @@ function ContinueLearningItem({ id, title, subtitle, progress, thumbnail }: Cont
         <div className="w-full sm:w-48 h-32 relative">
           <img src={thumbnail} alt={title} className="w-full h-full object-cover" />
           <Button 
-            variant="secondary" 
-            size="icon" 
-            className="absolute inset-0 m-auto rounded-full h-10 w-10 opacity-90 hover:opacity-100"
+            className="absolute inset-0 m-auto rounded-full h-10 w-10 opacity-90 hover:opacity-100 bg-secondary text-secondary-foreground hover:bg-secondary/80"
           >
             <Play className="h-5 w-5 text-primary" />
           </Button>
@@ -44,7 +41,7 @@ function ContinueLearningItem({ id, title, subtitle, progress, thumbnail }: Cont
           
           <div className="flex justify-end">
             <Link to={`/courses/${id}`}>
-              <Button variant="outline" size="sm">
+              <Button className="border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 text-black">
                 Continue
               </Button>
             </Link>
@@ -76,7 +73,7 @@ export function ContinueLearning() {
       title: 'Digital Marketing Masterclass',
       subtitle: 'Next lesson: Social Media Strategies - 35 min',
       progress: 10,
-      thumbnail: 'https://images.unsplash.com/photo-1533750349088-cd871a92f7b1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
+      thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
     },
   ];
 

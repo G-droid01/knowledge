@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { CourseCard } from './CourseCard';
 import { CourseFilters } from './CourseFilters';
 
@@ -29,7 +28,7 @@ const mockCourses = [
     id: '3',
     title: 'Digital Marketing Masterclass',
     instructor: 'Emma Wilson',
-    thumbnail: 'https://images.unsplash.com/photo-1533750349088-cd871a92f7b1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
+    thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1170&q=80',
     category: 'Marketing',
     duration: '15h 45m',
     students: 3211,
@@ -72,16 +71,51 @@ interface CourseListProps {
 }
 
 export function CourseList({ showFilters = true, limit, showProgress = false, title }: CourseListProps) {
-  const courses = limit ? mockCourses.slice(0, limit) : mockCourses;
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('popular');
+
+  // Filter courses based on category and search query
+  const filteredCourses = mockCourses
+    .filter(course => {
+      const matchesCategory = selectedCategory === 'all' || 
+        course.category.toLowerCase() === selectedCategory.toLowerCase();
+      const matchesSearch = !searchQuery || 
+        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        course.instructor.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return -1; // In a real app, you'd compare dates
+        case 'rated':
+          return b.students - a.students; // Using students as a proxy for rating
+        case 'popular':
+        default:
+          return b.students - a.students;
+      }
+    });
+
+  const displayCourses = limit ? filteredCourses.slice(0, limit) : filteredCourses;
   
   return (
     <div>
       {title && <h2 className="text-2xl font-bold mb-6">{title}</h2>}
       
-      {showFilters && <CourseFilters />}
+      {showFilters && (
+        <CourseFilters
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+        />
+      )}
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {courses.map((course) => (
+        {displayCourses.map((course) => (
           <CourseCard
             key={course.id}
             {...course}
@@ -89,6 +123,12 @@ export function CourseList({ showFilters = true, limit, showProgress = false, ti
           />
         ))}
       </div>
+
+      {displayCourses.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No courses found matching your criteria.</p>
+        </div>
+      )}
     </div>
   );
 }

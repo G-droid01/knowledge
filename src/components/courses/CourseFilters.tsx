@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Check, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -26,24 +25,39 @@ const sortOptions = [
   { label: 'Highest Rated', value: 'rated' },
 ];
 
-export function CourseFilters() {
-  const [category, setCategory] = React.useState('all');
-  const [sort, setSort] = React.useState('popular');
-  
+interface CourseFiltersProps {
+  selectedCategory: string;
+  onCategoryChange: (category: string) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
+  sortBy: string;
+  onSortChange: (sort: string) => void;
+}
+
+export function CourseFilters({
+  selectedCategory,
+  onCategoryChange,
+  searchQuery,
+  onSearchChange,
+  sortBy,
+  onSortChange,
+}: CourseFiltersProps) {
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-8">
       <div className="flex-1">
         <Input 
           placeholder="Search courses..." 
           className="w-full"
+          value={searchQuery}
+          onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
       
       <div className="flex gap-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full sm:w-auto justify-between">
-              {categories.find(c => c.value === category)?.label}
+            <Button className="w-full sm:w-auto justify-between border bg-background hover:bg-accent hover:text-accent-foreground">
+              {categories.find(c => c.value === selectedCategory)?.label}
               <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
@@ -53,8 +67,8 @@ export function CourseFilters() {
             {categories.map((item) => (
               <DropdownMenuCheckboxItem
                 key={item.value}
-                checked={category === item.value}
-                onCheckedChange={() => setCategory(item.value)}
+                checked={selectedCategory === item.value}
+                onCheckedChange={() => onCategoryChange(item.value)}
               >
                 {item.label}
               </DropdownMenuCheckboxItem>
@@ -64,8 +78,8 @@ export function CourseFilters() {
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full sm:w-auto justify-between">
-              Sort: {sortOptions.find(o => o.value === sort)?.label}
+            <Button className="w-full sm:w-auto justify-between border bg-background hover:bg-accent hover:text-accent-foreground">
+              Sort: {sortOptions.find(o => o.value === sortBy)?.label}
               <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
@@ -75,8 +89,8 @@ export function CourseFilters() {
             {sortOptions.map((item) => (
               <DropdownMenuCheckboxItem
                 key={item.value}
-                checked={sort === item.value}
-                onCheckedChange={() => setSort(item.value)}
+                checked={sortBy === item.value}
+                onCheckedChange={() => onSortChange(item.value)}
               >
                 {item.label}
               </DropdownMenuCheckboxItem>
