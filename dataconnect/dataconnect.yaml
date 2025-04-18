@@ -1,0 +1,12 @@
+specVersion: "v1"
+serviceId: "knwledge-final"
+location: "us-central1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "fdcdb"
+      cloudSql:
+        instanceId: "knwledge-final-fdc"
+      # schemaValidation: "COMPATIBLE"
+connectorDirs: ["./connector"]
