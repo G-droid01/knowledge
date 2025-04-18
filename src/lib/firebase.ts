@@ -6,14 +6,14 @@ import { getStorage } from 'firebase/storage';
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCQOTBkN_fciQ08C0Wkp7d-x7i3Jc0FfOc",
-  authDomain: "lms-573.firebaseapp.com",
-  projectId: "lms-573",
-  storageBucket: "lms-573.firebasestorage.app",
-  messagingSenderId: "22605140324",
-  appId: "1:22605140324:web:0c7054ae8d0fa3f0f26a71",
-  measurementId: "G-WG7WJ3CR4T"
+  apiKey: "AIzaSyANJTBJky8hXrwLQtCWcosCJgOMLLgaFCM",
+  authDomain: "e-learning-78f6d.firebaseapp.com",
+  projectId: "e-learning-78f6d",
+  storageBucket: "e-learning-78f6d.firebasestorage.app",
+  messagingSenderId: "86240420099",
+  appId: "1:86240420099:web:1c5106d53b66a222e68936"
 };
+
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

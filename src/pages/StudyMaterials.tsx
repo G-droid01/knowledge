@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, FileText, Video, Download, Book, File, Upload, Plus, PlusCircle } from "lucide-react";
+import { Search, FileText, Video, Download, Book, File, Upload, Plus, PlusCircle, Image } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/use-toast";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { db, storage } from "@/lib/firebase";
+import { collection, addDoc, getDocs } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+
 
 // Mock data for programs and specializations
 const programs = [
@@ -75,40 +79,7 @@ const mockMaterials = [
     specialization: "Software Engineering",
     category: "Development",
     downloadUrl: "#",
-    youtubeUrl: "https://www.youtube.com/watch?v=example1"
-  },
-  {
-    id: "2",
-    title: "Data Structures and Algorithms",
-    type: "video",
-    duration: "45 mins",
-    program: "Computer Science",
-    specialization: "Software Engineering",
-    category: "Development",
-    downloadUrl: "#",
-    youtubeUrl: "https://www.youtube.com/watch?v=example2"
-  },
-  {
-    id: "3",
-    title: "Machine Learning Basics",
-    type: "pdf",
-    size: "1.8 MB",
-    program: "Computer Science",
-    specialization: "Artificial Intelligence",
-    category: "Development",
-    downloadUrl: "#",
-    youtubeUrl: "https://www.youtube.com/watch?v=example3"
-  },
-  {
-    id: "4",
-    title: "Database Management Systems",
-    type: "book",
-    pages: "320",
-    program: "Computer Science",
-    specialization: "Software Engineering",
-    category: "Development",
-    downloadUrl: "#",
-    youtubeUrl: "https://www.youtube.com/watch?v=example4"
+    youtubeUrl: ""
   },
 ];
 
@@ -122,6 +93,7 @@ const StudyMaterials = () => {
     title: "",
     program: "",
     specialization: "",
+    youtubeUrl: "",
     file: null as File | null,
   });
   const [isAddingProgram, setIsAddingProgram] = useState(false);
@@ -130,6 +102,16 @@ const StudyMaterials = () => {
   const [newSpecialization, setNewSpecialization] = useState("");
   const [localPrograms, setLocalPrograms] = useState(programs);
   const [localSpecializations, setLocalSpecializations] = useState(specializations);
+  const [materials, setMaterials] = useState([]);
+
+  const fetchMaterials = async () => {
+    const snapshot = await getDocs(collection(db, "studyMaterials"));
+    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    setMaterials(data);
+  };
+  useEffect(() => {
+    fetchMaterials();
+  }, []);
 
   const getFileIcon = (type: string) => {
     switch (type) {
@@ -139,15 +121,29 @@ const StudyMaterials = () => {
         return <Video className="h-6 w-6 text-blue-500" />;
       case "book":
         return <Book className="h-6 w-6 text-green-500" />;
+      case "jpg":
+        return <Image className="h-6 w-6 text-yellow-500" />; // Add icon for jpg
       default:
-        return <File className="h-6 w-6 text-gray-500" />;
+        return <File className="h-6 w-6 text-gray-500" />; // Default icon
     }
   };
 
-  const filteredMaterials = mockMaterials.filter((material) => {
-    const matchesProgram = selectedProgram === "all" || material.program === localPrograms.find(p => p.id === selectedProgram)?.name;
-    const matchesSpecialization = selectedSpecialization === "all" || material.specialization === localSpecializations[selectedProgram]?.find(s => s.id === selectedSpecialization)?.name;
-    const matchesCategory = selectedCategory === "all" || material.category === categories.find(c => c.id === selectedCategory)?.name;
+
+  // const filteredMaterials = materials.filter((material) => {
+  //   const matchesProgram = selectedProgram === "all" || material.program === localPrograms.find(p => p.id === selectedProgram)?.name;
+  //   const matchesSpecialization = selectedSpecialization === "all" || material.specialization === localSpecializations[selectedProgram]?.find(s => s.id === selectedSpecialization)?.name;
+  //   const matchesCategory = selectedCategory === "all" || material.category === categories.find(c => c.id === selectedCategory)?.name;
+  //   const matchesSearch = !searchQuery || material.title.toLowerCase().includes(searchQuery.toLowerCase());
+  //   return matchesProgram && matchesSpecialization && matchesCategory && matchesSearch;
+  // });
+
+  const filteredMaterials = materials.filter((material) => {
+    const matchesProgram =
+      selectedProgram === "all" || material.program === localPrograms.find(p => p.id === selectedProgram)?.name;
+    const matchesSpecialization =
+      selectedSpecialization === "all" || material.specialization === localSpecializations[selectedProgram]?.find(s => s.id === selectedSpecialization)?.name;
+    const matchesCategory =
+      selectedCategory === "all" || material.category === categories.find(c => c.id === selectedCategory)?.name;
     const matchesSearch = !searchQuery || material.title.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesProgram && matchesSpecialization && matchesCategory && matchesSearch;
   });
@@ -164,7 +160,12 @@ const StudyMaterials = () => {
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!uploadForm.title || !uploadForm.program || !uploadForm.specialization || !uploadForm.file) {
+    if (
+      !uploadForm.title ||
+      !uploadForm.program ||
+      !uploadForm.specialization ||
+      !uploadForm.file
+    ) {
       toast({
         title: "Missing Fields",
         description: "Please fill in all required fields and select a file.",
@@ -174,24 +175,41 @@ const StudyMaterials = () => {
     }
 
     try {
-      // Here you would typically send the file to your backend
-      // For now, we'll just simulate an upload
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const file = uploadForm.file;
+      const storageRef = ref(storage, `studyMaterials/${file.name}`);
+      const uploadTaskSnapshot = await uploadBytes(storageRef, file);
+      const downloadUrl = await getDownloadURL(uploadTaskSnapshot.ref);
 
+      const fileType = file.name.split('.').pop() || 'unknown';
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+
+      const newMaterial = {
+        title: uploadForm.title,
+        program: uploadForm.program,
+        specialization: uploadForm.specialization,
+        type: fileType,
+        size: `${fileSizeMB} MB`,
+        downloadUrl: downloadUrl,
+        youtubeUrl: uploadForm.youtubeUrl
+      };
+
+      await addDoc(collection(db, "studyMaterials"), newMaterial);
+      fetchMaterials()
       toast({
         title: "Success!",
         description: "File has been uploaded successfully.",
       });
 
-      // Reset form and close dialog
       setUploadForm({
         title: "",
         program: "",
         specialization: "",
+        youtubeUrl: "",
         file: null,
       });
       setIsUploadDialogOpen(false);
     } catch (error) {
+      console.error(error);
       toast({
         title: "Upload Failed",
         description: "There was an error uploading your file. Please try again.",
@@ -199,6 +217,7 @@ const StudyMaterials = () => {
       });
     }
   };
+
 
   const handleAddProgram = () => {
     if (newProgram.trim()) {
@@ -353,6 +372,15 @@ const StudyMaterials = () => {
                   )}
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="youtubeUrl">Youtube url</Label>
+                  <Input
+                    id="youtubeUrl"
+                    value={uploadForm.youtubeUrl}
+                    onChange={(e) => setUploadForm(prev => ({ ...prev, youtubeUrl: e.target.value }))}
+                    placeholder="Enter youtube url"
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="file">File</Label>
                   <div className="flex items-center gap-2">
                     <Input
@@ -465,12 +493,43 @@ const StudyMaterials = () => {
             <Card key={material.id} className="flex flex-col">
               <CardContent className="pt-6">
                 <div className="flex items-start gap-4">
-                  {getFileIcon(material.type)}
+                  {getFileIcon(material.type || '')}
                   <div className="flex-1">
                     <h3 className="font-semibold mb-2">{material.title}</h3>
                     <div className="flex flex-wrap gap-2 mb-2">
-                      <Badge className="border bg-gray-100 text-muted-foreground">{material.program}</Badge>
-                      <Badge className="border bg-gray-100 text-muted-foreground">{material.specialization}</Badge>
+                      {/* Compare and render matched programs */}
+                      {material.program && Array.isArray(material.program)
+                        ? material.program.map((programId, index) => {
+                          const programMatch = programs.find(program => program.id === programId);
+                          return programMatch ? (
+                            <Badge key={index} className="border bg-gray-100 text-muted-foreground">
+                              {programMatch.name}  {/* Display program name */}
+                            </Badge>
+                          ) : null;
+                        })
+                        : material.program && (
+                          <Badge className="border bg-gray-100 text-muted-foreground">
+                            {programs.find(program => program.id === material.program)?.name} {/* Display program name */}
+                          </Badge>
+                        )}
+
+                      {/* Compare and render matched specializations */}
+                      {material.specialization && Array.isArray(material.specialization)
+                        ? material.specialization.map((specId, index) => {
+                          const specializationMatch = specializations[material.program]?.find(
+                            spec => spec.id === specId
+                          );
+                          return specializationMatch ? (
+                            <Badge key={index} className="border bg-gray-100 text-muted-foreground">
+                              {specializationMatch.name}  {/* Display specialization name */}
+                            </Badge>
+                          ) : null;
+                        })
+                        : material.specialization && (
+                          <Badge className="border bg-gray-100 text-muted-foreground">
+                            {specializations[material.program]?.find(spec => spec.id === material.specialization)?.name}
+                          </Badge>
+                        )}
                     </div>
                     <p className="text-sm text-muted-foreground">
                       {material.type === "video"
@@ -482,16 +541,17 @@ const StudyMaterials = () => {
                   </div>
                 </div>
               </CardContent>
+
               <CardFooter className="mt-auto">
                 <div className="flex gap-2 w-full">
                   <Button className="flex-1 border bg-transparent text-black hover:bg-gray-100" asChild>
-                    <a href={material.downloadUrl} download>
+                    <a target='_blank' href={material.downloadUrl} download>
                       <Download className="mr-2 h-4 w-4" />
                       Download
                     </a>
                   </Button>
                   <Button className="flex-1 border bg-transparent text-black hover:bg-gray-100" asChild>
-                    <a href={material.youtubeUrl} target="_blank" rel="noopener noreferrer">
+                    <a target='_blank' href={material.youtubeUrl} target="_blank" rel="noopener noreferrer">
                       <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                       </svg>
